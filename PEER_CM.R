@@ -54,7 +54,31 @@ residuals = PEER_getResiduals(model)
 dim(residuals)
 #plot(precision)
 
-save(factors,mod,file="PEER_factors_CM100.RData")
+save(factors,mod,weights,precision,residuals,file="PEER_factors_CM100.RData")
 
+options(stringsAsFactors = FALSE)
+rm(list=ls())
+setwd("C:/Users/jillh/Dropbox/DHGLab/commonmind/")
 
+load("FinalProcData_CM.RData")
+load("PEER_factors_CM100.RData")
+
+plot(precision[11:110])
+sd2 = apply(weights[,11:110],2,sd)
+plot(sd2)
+abline(h=0)
+head(sd2,20)
+## Use first 8 factors, based on standard deviation of factor weights
+
+modMat = cbind(rep(1,567),factors[,1:18])
+facs = c(1:8)
+facNames = paste("F",facs,sep="")
+names = c("Intercept",colnames(mod),facNames)
+colnames(modMat) = names
+
+## Remove PEER factors from the model before continuing
+
+datExpr.res = datExpr - modMat[,12:19]%*%t(weights[,11:18])
+
+save(datExpr.res,file="PEERreg_CM.RData")
 
