@@ -532,6 +532,8 @@ svobj = sva(as.matrix(datExpr),as.matrix(mod),as.matrix(mod0),n.sv=n.sv)
 
 factors = svobj$sv
 
+###(a) with full model
+
 ## Make object for ttables
 ttable = list("Bipolar"=matrix(NA,nrow=nrow(datExpr),ncol=5),
               "Schizo"=matrix(NA,nrow=nrow(datExpr),ncol=5))
@@ -554,7 +556,7 @@ for (i in 1:nrow(datExpr)) {
     coef[8]*regvars[,7] + coef[9]*regvars[,8] +coef[10]*regvars[,9] + coef[11]*regvars[,10] +residuals(lmmod[[i]]) 
   
   lmmod2 <- lm(datExpr.reg[i,]~Bipolar+Schizo+age+sex+RIN+race+seqStatPC1+seqStatPC2o,data=regvars)
-  lmmod2$df.residual <- lmmod2$df.residual - n.sv   ## 28 the number of coefficients previously removed
+  lmmod2$df.residual <- lmmod2$df.residual - n.sv   ## n.sv the number of coefficients previously removed
   summary = summary(lmmod2)
   
   ttable$Bipolar[i,1:4] <- coef(summary)[2,]
@@ -581,15 +583,15 @@ rownames(all_betas_lm) = rownames(datExpr)
 library(corrplot)
 
 par(mfrow=c(1,1)); par(mar=c(5,4,2,2)); par(oma=c(1,1,1,1))
-pdf(file="CM_BetaCorrHCPb.pdf")
+pdf(file="CM_BetaCorrSVAa.pdf")
 corrplot.mixed(cor(all_betas_lm, method="spearman"), lower="ellipse", upper= "number")
-title(main="Correlation CM - HCP factors removed b",line=1)
+title(main="Correlation CM - SVA factors removed a",line=1)
 dev.off()
-##0.28
-save(all_betas_lm,file="CM_Betas_HCPb.RData")
+
+save(all_betas_lm,file="CM_Betas_SVAa.RData")
 
 
-###(a) with full model
+
 
 
 ###(b) with regressed model
