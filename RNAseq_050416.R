@@ -18,7 +18,7 @@ rm(list=ls())
 
 #### (0) Check that Brain GVEX is not confounded, in case I want to use it later
 
-datMeta = read.csv("C:/Users/jillh/Dropbox/DHGLab/CDRNASeqExpr/BrainGVEX/datMeta.csv")[1:153,]
+datMeta2 = read.csv("C:/Users/jillh/Dropbox/DHGLab/CDRNASeqExpr/BrainGVEX/datMeta.csv")[1:154,]
 rownames(datMeta)=datMeta[,1]
 datMeta = datMeta[,-4]
 datMeta$Diagnosis = factor(datMeta$Diagnosis,levels=c("Control","BP","SCZ"))
@@ -240,6 +240,7 @@ save(all_betas_lm,file="CM_Betas_pure.RData")
 
 # See PEER_CM.R
 
+load("PEER_factors_CM100.RData")
 load("PEERreg_CM.RData")
 datExpr = datExpr.res
 ## Regress out the PEER factors and then...
@@ -262,12 +263,13 @@ rownames(ttable$Bipolar) <- rownames(ttable$Schizo) <- rownames(datExpr)
 colnames(ttable$Bipolar) <- colnames(ttable$Schizo) <- c("Estimate","Std.Error","t.value","Pr(>|t|)","p.adj")
 
 lmmod <- apply(as.matrix(datExpr),1,function(y) lm(y~mDx+age+sex+RIN+race+seqStatPC1+seqStatPC2,data=mod))
-
+               
 for (i in 1:nrow(datExpr)) {
   if (i%%1000 == 0) {print(i)}
   
   lmmod[[i]]$df.residual <- lmmod[[i]]$df.residual - 8   ## 8 the number of PEER coefficients previously removed
   summary = summary(lmmod[[i]])
+  summary = lmmod[[i]]
   
   ttable$Bipolar[i,1:4] <- coef(summary)[2,]
   ttable$Schizo[i,1:4] <- coef(summary)[3,]
