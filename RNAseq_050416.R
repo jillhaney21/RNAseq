@@ -18,7 +18,7 @@ rm(list=ls())
 
 #### (0) Check that Brain GVEX is not confounded, in case I want to use it later
 
-datMeta2 = read.csv("C:/Users/jillh/Dropbox/DHGLab/CDRNASeqExpr/BrainGVEX/datMeta.csv")[1:154,]
+datMeta = read.csv("C:/Users/jillh/Dropbox/DHGLab/CDRNASeqExpr/BrainGVEX/datMeta.csv")[1:154,]
 rownames(datMeta)=datMeta[,1]
 datMeta = datMeta[,-4]
 datMeta$Diagnosis = factor(datMeta$Diagnosis,levels=c("Control","BP","SCZ"))
@@ -52,21 +52,21 @@ dev.off()
 idx = which(datMeta$Sex=="M" & datMeta$Diagnosis=="Control") 
 datMetaCM= datMeta[idx,]
 
-## Remove the top 10 with the highest brain weight
+## Remove the top 10 with the highest pH
 
-datMetaCM = datMetaCM[order(datMetaCM$BrainWeight),]
+datMetaCM = datMetaCM[order(datMetaCM$pH),]
 to_remove = rownames(datMetaCM)[35:44]
 
 idx = which(rownames(datMeta)%in%to_remove)
 
 datMeta_sub = datMeta[-idx,]
 
-## Also remove 5 bipolar females with lowest RIN
+## Also remove 8 bipolar females with lowest RIN
 
 idx = which(datMeta$Sex=="F" & datMeta$Diagnosis=="BP")
 datMetaBF = datMeta[idx,]
 datMetaBF = datMetaBF[order(datMetaBF$RIN),]
-to_remove = rownames(datMetaBF)[1:5]
+to_remove = rownames(datMetaBF)[1:8]
 
 idx = which(rownames(datMeta_sub)%in%to_remove)
 datMeta_sub = datMeta_sub[-idx,]
@@ -111,6 +111,7 @@ write.csv(datMeta_sub,file="C:/Users/jillh/Dropbox/DHGLab/CDRNASeqExpr/BrainGVEX
 ## See commonMind.R for pre-processing
 
 rm(list=ls())
+options(stringsAsFactors = FALSE)
 load("C:/Users/jillh/Dropbox/DHGLab/commonmind/FinalProcData_CM.RData")
 
 datMeta$Dx <- factor(datMeta$Dx, levels=c("Control","BP","SCZ"))
@@ -140,7 +141,7 @@ datExpr.reg <- matrix(NA,nrow=nrow(datExpr),ncol=ncol(datExpr))
 rownames(datExpr.reg) <- rownames(datExpr)
 colnames(datExpr.reg) <- colnames(datExpr)
 
-lmmod <- apply(as.matrix(datExpr),1,function(y) lm(y~age+sex+RIN+race+seqStatPC1+seqStatPC2,data=regvars))
+lmmod <- apply(as.matrix(datExpr)[1:1000,],1,function(y) lm(y~age+sex+RIN+race+seqStatPC1+seqStatPC2,data=regvars))
 
 for (i in 1:nrow(datExpr)) {
   if (i%%1000 == 0) {print(i)}
@@ -269,7 +270,6 @@ for (i in 1:nrow(datExpr)) {
   
   lmmod[[i]]$df.residual <- lmmod[[i]]$df.residual - 8   ## 8 the number of PEER coefficients previously removed
   summary = summary(lmmod[[i]])
-  summary = lmmod[[i]]
   
   ttable$Bipolar[i,1:4] <- coef(summary)[2,]
   ttable$Schizo[i,1:4] <- coef(summary)[3,]
